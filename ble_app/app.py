@@ -16,7 +16,7 @@ import queue
 # Configure Streamlit page
 st.set_page_config(
     page_title="Activity Monitor",
-    page_icon="pao bu",
+    page_icon="🏃‍♂️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -211,9 +211,7 @@ def display_real_time_data():
     latest_data = data_list[-1]
     print(latest_data)
     
-    # Current activity display
-    col1, col2, col3, col4 = st.columns(4)
-    
+    # Current activity display - full width
     activity_emoji = {
         'Walking': '🚶🏼‍♀️',
         'Jogging': '🏃‍♀️', 
@@ -223,12 +221,20 @@ def display_real_time_data():
         'Downstairs': '⬇️'
     }
     
+    activity = latest_data.get('act', 'unknown')
+    st.metric(
+        label="Current Activity",
+        value=f"{activity_emoji.get(activity, '❓')} {activity.title()}"
+    )
+    
+    # Second row: Model confidence + Accelerometer data
+    col1, col2, col3, col4 = st.columns(4)
+    
     with col1:
-        activity = latest_data.get('act', 'unknown')
-        st.metric(
-            label="Current Activity",
-            value=f"{activity_emoji.get(activity, '❓')} {activity.title()}"
-        )
+        if 'confidence' in latest_data:
+            st.metric("Model Confidence", f"{latest_data.get('confidence', 0):.1%}")
+        else:
+            st.metric("Model Confidence", "N/A")
     
     with col2:
         st.metric("Accel X", f"{latest_data.get('ax', 0):.3f} g")
@@ -239,10 +245,6 @@ def display_real_time_data():
     with col4:
         st.metric("Accel Z", f"{latest_data.get('az', 0):.3f} g")
     
-    # Show confidence if available
-    if 'confidence' in latest_data:
-        st.metric("Model Confidence", f"{latest_data.get('confidence', 0):.1%}")
-    
     if len(data_list) > 1:
         # Convert to DataFrame
         df = pd.DataFrame(data_list)
@@ -250,17 +252,22 @@ def display_real_time_data():
         
         # Activity timeline
         st.subheader("📈 Activity Timeline")
+        
+        # Consistent color mapping for all charts
+        activity_colors = {
+            'Standing': '#1f77b4',
+            'Walking': '#ff7f0e', 
+            'Jogging': '#d62728',
+            'Upstairs': '#2ca02c',
+            'Downstairs': '#9467bd',
+            'Sitting': '#8c564b'  # Changed to brown to avoid blue conflict
+        }
+        
         fig_timeline = px.scatter(
             df, x='datetime', y='act', color='act',
             title="Activity Over Time",
-            color_discrete_map={
-                'Standing': '#1f77b4',
-                'Walking': '#ff7f0e', 
-                'Jogging': '#d62728',
-                'Upstairs': '#2ca02c',
-                'Downstairs': '#9467bd',
-                'Sitting': '#ff70f0'
-            }
+            color_discrete_map=activity_colors,
+            category_orders={'act': list(activity_colors.keys())}  # Force consistent ordering
         )
         fig_timeline.update_traces(marker_size=10)
         st.plotly_chart(fig_timeline, use_container_width=True)
@@ -280,18 +287,13 @@ def display_real_time_data():
         with col1:
             st.subheader("Activity Distribution")
             activity_counts = df['act'].value_counts()
+            
+            # Ensure the pie chart uses the same order and colors
             fig_pie = px.pie(
                 values=activity_counts.values,
                 names=activity_counts.index,
                 title="Time Spent in Each Activity",
-                color_discrete_map={
-                    'Standing': '#1f77b4',
-                    'Walking': '#ff7f0e',
-                    'Jogging': '#d62728', 
-                    'Upstairs': '#2ca02c',
-                    'Downstairs': '#9467bd',
-                    'Sitting': '#ff70f0'
-                }
+                color_discrete_map=activity_colors,
             )
             st.plotly_chart(fig_pie, use_container_width=True)
         
