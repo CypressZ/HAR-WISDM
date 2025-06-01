@@ -3,8 +3,12 @@
 1. ```pip install -r requirements.txt``` to install any required python libraries
 2. Run ```find_arduino_address.py``` to find your arduino device address
 3. Replace the found address (eg. 64609202-37DA-83AF-1A6A-87D95E127B3F) in ```app.py``` by searching for ```ARDUINO_ADDRESS = ```
-4. Flash **nano_ble33_sense_accelerometer_custom** to board to start inference + BLE, launch Serial Monitor for logs
-5. Run the app from ```/ble_app```
+4. Include .zip library ```ei-har--wisdm-arduino-1.0.x.zip``` that contains trained ML model in Arduino:
+  Open Arduino IDE > **Sketch** > **Include Library** > **Add .zip Library**
+5. Open the ```.ino``` file from Arduino IDE: 
+   **File** > **Examples** > **HAR_-WISDM_inferencing** > **nano_ble33_sense** > **nano_ble33_sense_accelerometer**, replace with file  ```nano_ble33_sense_accelerometer_custom/nano_ble33_sense_accelerometer_custom.ino``` and save
+6. Open and flash ```nano_ble33_sense_accelerometer_custom.ino``` to board to start inference + BLE, launch Serial Monitor for logs
+7. Run the app from ```/ble_app```
 ```
 streamlit run app.py
 ```
