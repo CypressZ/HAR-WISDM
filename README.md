@@ -6,6 +6,9 @@ A real-time human activity recognition system using Arduino Nano 33 BLE Sense an
 See ```/ble_app/README.md``` for more details.
 
 
+### Demo
+![User Experience Demo](demo.gif)
+
 #### Acknowledgments
 
 - WISDM Project - Original research and dataset
